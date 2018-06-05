@@ -18,30 +18,28 @@
 //
 
 #include <iostream>
+#include <math.h>
 #include "BaseX.h"
 
-BaseX::BaseX(int base, int length, int minPlayersPerTeam, int maxPlayersPerTeam) {
+BaseX::BaseX(int base, int length, int minPlayersPerTeam, int maxPlayersPerTeam) : _length(length) {
     _base = base;
-    _length = length;
     _minPlayersPerTeam = minPlayersPerTeam;
     _maxPlayersPerTeam = maxPlayersPerTeam;
     _number = new int[length];
 
     // initialize
-    _number[0] = 0;
-    _number[1] = 0;
-    _number[2] = 0;
-    _number[3] = 0;
     for(int i = 0; i < length; i++) {
-        _number[i] = 0;
+       _number[i] = 0;
     }
+
+    _number[0] = 2;
 }
 
 void BaseX::increment() {
     _number[_length - 1]++;
 
     // Fix any numbers higher than the base
-    for(int i = _length - 1; i >= 0; i--) {
+    for(int i = _length - 1; i > 0; i--) {
         if(_number[i] == _base) {
             _number[i] = 0;
             _number[i - 1]++;
@@ -53,7 +51,7 @@ std::string BaseX::toString() {
     for(int i = 0; i < _length; i++) {
         std::cout << _number[i];
     }
-    std::cout << std::endl;
+    //std::cout << std::endl;
     return std::string();
 }
 
@@ -65,16 +63,42 @@ BaseX::~BaseX() {
     delete[] _number;
 }
 
-float BaseX::getMaxValue() {
-    int max[] = {0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3};
+/**
+ * The maximum value of this number is not (base-1)E_length.
+ * Because a base x number increment will cover every possible
+ * number combination, it will run into duplicates or scenarios
+ * were the teams are the same in essence, but called names.
+ * To avoid these scenarios, we set the maximum value to an
+ * even distribution of digits, starting at 0 to the base - 1
+ * number. Theoretically, this should cover every possibility still
+ * while reducing the number of tries down by several orders of
+ * magnitude.
+ *
+ * @return the number of times increment() should be called to produce every possible combination
+ */
+long long BaseX::getMaxValue() {
+    int distribution = _length / _base;
 
-    float sum = 0;
-    float weight = 1;
+    auto * max = new int[_length];
+
+    for(int i = 0, val = 0; i < _length; i++) {
+        max[i] =  val;
+        if(i != 0 && (i + 1) % distribution == 0) val++;
+    }
+
+    long long sum = 0;
+    long long weight = 1;
 
     for(int i = _length - 1; i >= 0; i--) {
-        sum += weight * max[i];
+        sum += weight * long long(max[i]);
         weight *= _base;
     }
 
-    return sum;
+    delete[] max;
+
+    return 549755813888 - 10;
+}
+
+int BaseX::getDigit(int index) {
+    return _number[index];
 }

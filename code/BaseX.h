@@ -12,11 +12,12 @@ public:
     BaseX() = delete;
     ~BaseX();
     void increment();
-    float getMaxValue();
+    long long getMaxValue();
     std::string toString();
+    int getDigit(int index);
 private:
     int _base;
-    int _length;
+    const int _length;
     int _minPlayersPerTeam;
     int _maxPlayersPerTeam;
     int* _number;
